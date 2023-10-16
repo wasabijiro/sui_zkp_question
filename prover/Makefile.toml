@@ -1,0 +1,4 @@
+[tasks."build:proof"]
+script = '''
+cargo run
+'''
