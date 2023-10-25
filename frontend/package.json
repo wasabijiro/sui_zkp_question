@@ -11,9 +11,12 @@
   "dependencies": {
     "@mysten/sui.js": "^0.44.0",
     "@suiet/wallet-kit": "^0.2.19",
+    "circomlib": "^2.0.5",
     "next": "13.5.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "snarkjs": "^0.7.1",
+    "zustand": "^4.4.4"
   },
   "devDependencies": {
     "@types/node": "^20",
