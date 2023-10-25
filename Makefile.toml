@@ -1,0 +1,18 @@
+[tasks."verify"]
+script = '''
+cd scripts
+bun src/verify.ts
+'''
+
+[tasks."build:circuit"]
+script = '''
+cd circuit
+bun i
+circom main.circom --r1cs --wasm
+'''
+
+[tasks."dev:ui"]
+script = '''
+cd frontend
+bun run dev
+'''
