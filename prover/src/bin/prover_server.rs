@@ -78,6 +78,10 @@ async fn generate_proof(
 
     println!("Verification successful, preparing response");
 
+    println!("vk_bytes: {}", hex::encode(&vk_bytes));
+    println!("public_inputs_bytes: {}", hex::encode(&public_inputs_bytes));
+    println!("proof_points_bytes: {}", hex::encode(&proof_points_bytes));
+
     let response = json!({
         "vk": hex::encode(&vk_bytes),
         "public_inputs": hex::encode(&public_inputs_bytes),

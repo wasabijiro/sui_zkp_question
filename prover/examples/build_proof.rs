@@ -176,7 +176,7 @@ fn verify_proof_with_r1cs(inputs: CircomInput, wasm_path: &str, r1cs_path: &str)
 fn main() {
     verify_proof_with_r1cs(
         load_public_inputs_from_file("prover_inputs.json"),
-        "../circuit/main_js/main.wasm",
-        "../circuit/main.r1cs",
+        "../circuits/build/multiplier_js/multiplier.wasm",
+        "../circuits/build/multiplier.r1cs",
     );
 }

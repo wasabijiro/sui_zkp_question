@@ -1,16 +1,22 @@
-use std::collections::HashMap;
-
 pub use ark_bn254::{Bn254 as Curve, Fr};
 use ark_circom::{CircomBuilder, CircomConfig};
 use ark_crypto_primitives::snark::SNARK;
 use ark_ec::bn::G2Prepared;
 use ark_groth16::Proof;
 use ark_groth16::{Groth16, PreparedVerifyingKey as ArkPreparedVerifyingKey};
-use ark_serialize::CanonicalDeserialize;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_std::rand::thread_rng;
 use fastcrypto::error::FastCryptoError;
 use fastcrypto_zkp::bn254::api::SCALAR_SIZE;
 use fastcrypto_zkp::bn254::verifier::{process_vk_special, PreparedVerifyingKey};
+use num_bigint::BigInt;
+use num_traits::Num;
+use serde_json::json;
+use serde_json::Value;
+use std::collections::HashMap;
+use std::fs;
+use std::fs::File;
+use std::io::Write;
 
 use crate::helpers::serialize_to_bytes;
 
@@ -21,13 +27,21 @@ pub fn verify_groth16(
     proof_public_inputs_as_bytes: &[u8],
     proof_points_as_bytes: &[u8],
 ) -> Result<bool, FastCryptoError> {
+    dbg!("pvk", &pvk);
+    dbg!("proof_public_inputs_as_bytes", &proof_public_inputs_as_bytes);
+    dbg!("proof_points_as_bytes", &proof_points_as_bytes);
+
     let proof = Proof::<Curve>::deserialize_compressed(proof_points_as_bytes)
         .map_err(|_| FastCryptoError::InvalidInput)?;
+
     let mut public_inputs = Vec::new();
-    for chunk in proof_public_inputs_as_bytes.chunks(SCALAR_SIZE) {
-        public_inputs
-            .push(Fr::deserialize_compressed(chunk).map_err(|_| FastCryptoError::InvalidInput)?);
+    for (i, chunk) in proof_public_inputs_as_bytes.chunks(SCALAR_SIZE).enumerate() {
+        match Fr::deserialize_compressed(chunk) {
+            Ok(input) => public_inputs.push(input),
+            Err(_) => return Err(FastCryptoError::GeneralError(format!("Failed to deserialize public input at chunk {}", i))),
+        }
     }
+
     let ark_pkv = {
         let mut ark_pvk = ArkPreparedVerifyingKey::default();
         ark_pvk.vk.gamma_abc_g1 = pvk.vk_gamma_abc_g1.clone();
@@ -38,7 +52,7 @@ pub fn verify_groth16(
     };
 
     Groth16::<Curve>::verify_with_processed_vk(&ark_pkv, &public_inputs, &proof)
-        .map_err(|e| FastCryptoError::GeneralError(e.to_string()))
+        .map_err(|e| FastCryptoError::GeneralError(format!("Failed to verify proof: {}", e)))
 }
 
 pub fn verify_proof_with_r1cs(
@@ -70,13 +84,50 @@ pub fn verify_proof_with_r1cs(
     dbg!("verified", &verified);
     assert!(verified);
 
-    let vk_bytes = serialize_to_bytes(&params.vk);
-    let public_inputs_bytes = serialize_to_bytes(&inputs);
-    let proof_points_bytes = serialize_to_bytes(&proof);
+    // let vk_bytes = serialize_to_bytes(&params.vk);
+    // let public_inputs_bytes = serialize_to_bytes(&inputs);
+    // let proof_points_bytes = serialize_to_bytes(&proof);
+
+    let vk_bytes = {
+        let mut vk_bytes = vec![];
+        params.vk.serialize_compressed(&mut vk_bytes).unwrap();
+        vk_bytes
+    };
+
+    let public_inputs_bytes = {
+        let mut public_inputs_bytes = Vec::new();
+        for input in inputs.iter() {
+            input
+                .serialize_compressed(&mut public_inputs_bytes)
+                .unwrap();
+        }
+        public_inputs_bytes
+    };
+
+    let proof_points_bytes = {
+        let mut proof_points_bytes = Vec::new();
+        proof
+            .a
+            .serialize_compressed(&mut proof_points_bytes)
+            .unwrap();
+        proof
+            .b
+            .serialize_compressed(&mut proof_points_bytes)
+            .unwrap();
+        proof
+            .c
+            .serialize_compressed(&mut proof_points_bytes)
+            .unwrap();
+        proof_points_bytes
+    };
 
     let pvk = process_vk_special(&params.vk.into());
     let result = verify_groth16(&pvk, &public_inputs_bytes, &proof_points_bytes);
     dbg!("result", &result);
+
+    println!("{:?}", &vk_bytes);
+    println!("{:?}", &public_inputs_bytes);
+    println!("{:?}", &proof_points_bytes);
 
     (vk_bytes, public_inputs_bytes, proof_points_bytes)
 }

@@ -22,3 +22,9 @@ script = '''
 cd prover
 cargo run --bin server
 '''
+
+[tasks."test:build-proof"]
+script = '''
+cd prover
+cargo run --example build_proof
+'''

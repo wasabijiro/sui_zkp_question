@@ -7,9 +7,6 @@ import React, { useEffect, useState } from "react";
 import { usePasscodeStore, useVerifierInputsStore } from "@/libs/store";
 
 export default function Home() {
-  const { passcode } = usePasscodeStore();
-  const { verifierInputs, setVerifierInputs } = useVerifierInputsStore();
-
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetch("http://localhost:8080/generate-proof", {
