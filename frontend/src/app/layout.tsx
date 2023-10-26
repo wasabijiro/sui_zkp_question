@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { WalletProvider } from "@suiet/wallet-kit";
 import "@suiet/wallet-kit/style.css";
-import { metadata } from "../constants/metadata";
 
 const inter = Inter({ subsets: ["latin"] });
 
