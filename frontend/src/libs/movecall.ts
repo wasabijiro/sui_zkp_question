@@ -1,4 +1,5 @@
 import type { VerifierInputs } from "@/types";
+import { TransactionBlock } from "@mysten/sui.js";
 import { PACKAGE_ID } from "@/config/sui";
 
 const verifiedInputsSample: VerifierInputs = {
@@ -8,3 +9,55 @@ const verifiedInputsSample: VerifierInputs = {
   proof_points:
     "890c80d78a10cd98e77d59fcff3a5e561edc98c27aa517b6f87d00f853e05d88a30b3b4b3cbaafd81f97ce98aa0f1be39480ebd4d7cd0960f52ec94995d3f0206ad500c6fcb816c017a5531ee949d2889f641c1d420bff9cfa2d19912ab1ea2c82fa55eeab217bf42d5128caba7daeac0e037253719526fad59206532c28c328",
 };
+
+export const createMintTransactionBlock = (props: {
+  txb: TransactionBlock;
+  // vk_bytes: string;
+  // public_inputs_bytes: string;
+  // proof_points_bytes: string;
+  verifierInputs: VerifierInputs;
+  name: string;
+  descripton: string;
+  url: string;
+}) => {
+  props.txb.moveCall({
+    target: `${PACKAGE_ID}::verifier::issue_certificate`,
+    typeArguments: [],
+    arguments: [
+      props.txb.pure(
+        Array.from(Buffer.from(props.verifierInputs.vk, "hex")),
+        "vector<u8>"
+      ),
+      props.txb.pure(
+        Array.from(Buffer.from(props.verifierInputs.public_inputs, "hex")),
+        "vector<u8>"
+      ),
+      props.txb.pure(
+        Array.from(Buffer.from(props.verifierInputs.proof_points, "hex")),
+        "vector<u8>"
+      ),
+      props.txb.pure(props.name),
+      props.txb.pure(props.descripton),
+      props.txb.pure(props.url),
+    ],
+  });
+};
+
+// export const moveCallMintNft = async (props: {
+//   txb: TransactionBlock;
+//   name: string;
+//   description: string;
+//   url: string;
+// }) => {
+//   const moduleName = "dev_nft";
+//   const methodName = "mint_to_sender";
+
+//   props.txb.moveCall({
+//     target: `${NFT_PACKAGE_ID}::${moduleName}::${methodName}`,
+//     arguments: [
+//       props.txb.pure(props.name),
+//       props.txb.pure(props.description),
+//       props.txb.pure(props.url),
+//     ],
+//   });
+// };
