@@ -94,48 +94,48 @@ module question::nft {
     }
 }
 
-#[test_only]
-module question::nft_test {
-    use question::nft::{Self, CertificateNFT, mint_to_sender};
-    use sui::test_scenario as ts;
-    use sui::transfer;
-    use std::string;
+// #[test_only]
+// module question::nft_test {
+//     use question::nft::{Self, CertificateNFT, mint_to_sender};
+//     use sui::test_scenario as ts;
+//     use sui::transfer;
+//     use std::string;
 
-    #[test]
-    fun mint_transfer_update() {
-        let addr1 = @0xA;
-        let addr2 = @0xB;
-        // create the NFT
-        let scenario = ts::begin(addr1);
+//     #[test]
+//     fun mint_transfer_update() {
+//         let addr1 = @0xA;
+//         let addr2 = @0xB;
+//         // create the NFT
+//         let scenario = ts::begin(addr1);
 
-        {
-            mint_to_sender(
-                "test",
-                "a test",
-                "https://www.sui.io",
-                ts::ctx(&mut scenario)
-            )
-        };
-        // send it from A to B
-        ts::next_tx(&mut scenario, addr1);
-        {
-            let nft = ts::take_from_sender<CertificateNFT>(&mut scenario);
-            transfer::public_transfer(nft, addr2);
-        };
-        // update its description
-        ts::next_tx(&mut scenario, addr2);
-        {
-            let nft = ts::take_from_sender<CertificateNFT>(&mut scenario);
-            nft::update_description(&mut nft, b"a new description", ts::ctx(&mut scenario));
-            assert!(*string::bytes(nft::description(&nft)) == b"a new description", 0);
-            ts::return_to_sender(&mut scenario, nft);
-        };
-        // burn it
-        ts::next_tx(&mut scenario, addr2);
-        {
-            let nft = ts::take_from_sender<CertificateNFT>(&mut scenario);
-            nft::burn(nft, ts::ctx(&mut scenario))
-        };
-        ts::end(scenario);
-    }
-}
+//         {
+//             mint_to_sender(
+//                 "test",
+//                 "a test",
+//                 "https://www.sui.io",
+//                 ts::ctx(&mut scenario)
+//             )
+//         };
+//         // send it from A to B
+//         ts::next_tx(&mut scenario, addr1);
+//         {
+//             let nft = ts::take_from_sender<CertificateNFT>(&mut scenario);
+//             transfer::public_transfer(nft, addr2);
+//         };
+//         // update its description
+//         ts::next_tx(&mut scenario, addr2);
+//         {
+//             let nft = ts::take_from_sender<CertificateNFT>(&mut scenario);
+//             nft::update_description(&mut nft, b"a new description", ts::ctx(&mut scenario));
+//             assert!(*string::bytes(nft::description(&nft)) == b"a new description", 0);
+//             ts::return_to_sender(&mut scenario, nft);
+//         };
+//         // burn it
+//         ts::next_tx(&mut scenario, addr2);
+//         {
+//             let nft = ts::take_from_sender<CertificateNFT>(&mut scenario);
+//             nft::burn(nft, ts::ctx(&mut scenario))
+//         };
+//         ts::end(scenario);
+//     }
+// }

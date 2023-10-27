@@ -6,9 +6,8 @@ bun src/verify.ts
 
 [tasks."build:circuit"]
 script = '''
-cd circuit
-bun i
-circom main.circom --r1cs --wasm
+cd circuits
+circom multiplier.circom --r1cs --wasm --sym -o build
 '''
 
 [tasks."dev:ui"]
@@ -27,4 +26,10 @@ cargo run --bin server
 script = '''
 cd prover
 cargo run --example build_proof
+'''
+
+[tasks."deploy:sui"]
+script = '''
+cd contracts
+sui client publish --gas-budget 123456789 --skip-dependency-verification
 '''

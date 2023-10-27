@@ -43,6 +43,36 @@ export const createMintTransactionBlock = (props: {
   });
 };
 
+export const createVoteObject = (props: { txb: TransactionBlock }) => {
+  props.txb.moveCall({
+    target: `${PACKAGE_ID}::vote::new_vote`,
+    typeArguments: [],
+    arguments: [],
+  });
+};
+
+export const movecallVoteA = (props: {
+  txb: TransactionBlock;
+  vote_obj: string;
+}) => {
+  props.txb.moveCall({
+    target: `${PACKAGE_ID}::vote::vote_a`,
+    typeArguments: [],
+    arguments: [props.txb.pure(props.vote_obj)],
+  });
+};
+
+export const movecallVoteB = (props: {
+  txb: TransactionBlock;
+  vote_obj: string;
+}) => {
+  props.txb.moveCall({
+    target: `${PACKAGE_ID}::vote::vote_b`,
+    typeArguments: [],
+    arguments: [props.txb.pure(props.vote_obj)],
+  });
+};
+
 // export const moveCallMintNft = async (props: {
 //   txb: TransactionBlock;
 //   name: string;
