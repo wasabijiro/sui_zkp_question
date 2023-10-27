@@ -1,3 +1,4 @@
+// prover/examples/build_proof.rs
 pub use ark_bn254::{Bn254 as Curve, Fr};
 use ark_circom::{CircomBuilder, CircomConfig};
 use ark_crypto_primitives::snark::SNARK;
@@ -25,14 +26,20 @@ fn load_public_inputs_from_file(file_path: &str) -> HashMap<String, Vec<BigInt>>
 
     if let Value::Object(entries) = inputs {
         for (key, value) in entries {
-            if let Value::String(s) = value {
-                map.insert(
-                    key,
-                    vec![BigInt::from_str_radix(&s, 10).expect("Failed to parse BigInt")],
-                );
+            if let Value::Array(arr) = value {
+                let bigints: Vec<BigInt> = arr.iter().filter_map(|v| {
+                    if let Value::Number(num) = v {
+                        Some(BigInt::from(num.as_i64().unwrap()))
+                    } else {
+                        None
+                    }
+                }).collect();
+                map.insert(key, bigints);
             }
         }
     }
+
+    println!("Loaded inputs from file: {:?}", map);
 
     map
 }
@@ -67,6 +74,8 @@ type CircomInput = HashMap<String, Vec<num_bigint::BigInt>>;
 fn verify_proof_with_r1cs(inputs: CircomInput, wasm_path: &str, r1cs_path: &str) {
     dbg!("inputs", &inputs);
     dbg!("#1");
+
+    println!("Inputs passed to verify_proof_with_r1cs: {:?}", inputs);
 
     // Load the WASM and R1CS for witness and proof generation
     let cfg = CircomConfig::<Curve>::new(wasm_path, r1cs_path).unwrap();

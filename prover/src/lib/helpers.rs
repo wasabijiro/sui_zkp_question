@@ -13,11 +13,15 @@ pub fn load_public_inputs_from_file(file_path: &str) -> HashMap<String, Vec<BigI
 
     if let Value::Object(entries) = inputs {
         for (key, value) in entries {
-            if let Value::String(s) = value {
-                map.insert(
-                    key,
-                    vec![BigInt::from_str_radix(&s, 10).expect("Failed to parse BigInt")],
-                );
+            if let Value::Array(arr) = value {
+                let bigints: Vec<BigInt> = arr.iter().filter_map(|v| {
+                    if let Value::Number(num) = v {
+                        Some(BigInt::from(num.as_i64().unwrap()))
+                    } else {
+                        None
+                    }
+                }).collect();
+                map.insert(key, bigints);
             }
         }
     }
