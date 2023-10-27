@@ -20,6 +20,9 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [digest, setDigest] = useState("");
   const [objectId, setObjectId] = useState("");
+  const [voted, setVoted] = useState(false);
+  const [votedA, setVotedA] = useState(false);
+  const [votedB, setVotedB] = useState(false);
 
   const getObjectId = (data: any, desiredObjectType: string): string | null => {
     for (const change of data.objectChanges) {
@@ -65,11 +68,12 @@ export default function Home() {
 
   const exctuteVoteA = async () => {
     setMessage("");
-    setLoading(true);
-    setMessage("Loading...");
-    if (!objectId) {
+    if (!objectId || votedA || votedB) {
+      setMessage("Please try again!");
       return;
     }
+    setLoading(true);
+    setMessage("Loading...");
     try {
       const txb = new TransactionBlock();
       movecallVoteA({
@@ -86,6 +90,7 @@ export default function Home() {
       console.log(url);
       setDigest(result.digest);
       setUrl(url);
+      setVotedA(true);
     } catch (err) {
       console.log("err:", err);
       setMessage(`Mint Failed ${err}`);
@@ -96,11 +101,12 @@ export default function Home() {
 
   const exctuteVoteB = async () => {
     setMessage("");
-    setLoading(true);
-    setMessage("Loading...");
-    if (!objectId) {
+    if (!objectId || votedA || votedB) {
+      setMessage("Please try again!");
       return;
     }
+    setLoading(true);
+    setMessage("Loading...");
     try {
       const txb = new TransactionBlock();
       movecallVoteB({
@@ -117,6 +123,7 @@ export default function Home() {
       console.log(url);
       setDigest(result.digest);
       setUrl(url);
+      setVotedB(true);
     } catch (err) {
       console.log("err:", err);
       setMessage(`Mint Failed ${err}`);
@@ -134,10 +141,22 @@ export default function Home() {
         Create
       </button>
       <div className="">
-        <button onClick={exctuteVoteA} disabled={loading} className="">
+        <button
+          className={`mx-auto ${
+            votedA ? "text-white bg-blue-500" : "text-black bg-white"
+          } rounded-md px-4 py-2`}
+          onClick={exctuteVoteA}
+          disabled={loading}
+        >
           Vote A
         </button>
-        <button onClick={exctuteVoteB} disabled={loading} className="">
+        <button
+          className={`mx-auto ${
+            votedB ? "text-white bg-blue-500" : "text-black bg-white"
+          } rounded-md px-4 py-2`}
+          onClick={exctuteVoteB}
+          disabled={loading}
+        >
           Vote B
         </button>
       </div>
