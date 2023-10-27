@@ -27,6 +27,20 @@ module question::vote {
     }
 
     public entry fun vote_a (vote: &mut Vote, ctx: &mut TxContext) {
+        let len_a = vector::length(&vote.a);
+        let len_b = vector::length(&vote.b);
+        let i = 0;
+        while (i < len_a) {
+            let voted_address = vector::borrow(&vote.a, i);
+            assert!(*voted_address != tx_context::sender(ctx), 1001);
+            i = i + 1;
+        };
+        let j = 0;
+        while (j < len_b) {
+            let voted_address = vector::borrow(&vote.b, j);
+            assert!(*voted_address != tx_context::sender(ctx), 1002);
+            j = j + 1;
+        };
         vector::push_back(&mut vote.a, tx_context::sender(ctx));
     }
 

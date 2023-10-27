@@ -28,6 +28,12 @@ cd prover
 cargo run --example build_proof
 '''
 
+[tasks."build:sui"]
+script = '''
+cd contracts
+sui move build
+'''
+
 [tasks."deploy:sui"]
 script = '''
 cd contracts
